@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABDÃœLKADÄ°Râ€™Ä° TOKATLAMA OYUNU</title>
+
+<style>
+body{
+  margin:0;
+  background:linear-gradient(135deg,#1a2a3a,#243b55);
+  color:white;
+  font-family:Arial, sans-serif;
+  overflow:hidden;
+}
+h1{ text-align:center; margin:10px 0; font-size:22px; }
+
+#canBar{
+  width:75%; height:16px; background:#444;
+  margin:auto; border-radius:10px; overflow:hidden;
+}
+#can{ width:100%; height:100%; background:limegreen; }
+
+#panel{ text-align:center; margin-top:10px; }
+button{
+  padding:10px 16px; margin:5px; font-size:15px;
+  border-radius:8px; border:none;
+}
+
+#oyun{ position:relative; width:100%; height:70vh; }
+
+#oyuncuFoto{
+  position:absolute; top:50%; left:50%;
+  width:270px; transform:translate(-50%,-50%);
+  border-radius:15px; display:none; z-index:2;
+}
+
+/* FOTOÄžRAF SHAKE */
+.foto-shake{
+  animation: fotoShake 0.18s;
+}
+@keyframes fotoShake{
+  0%{ transform:translate(-50%,-50%); }
+  25%{ transform:translate(-48%,-50%) rotate(1deg); }
+  50%{ transform:translate(-52%,-50%) rotate(-1deg); }
+  75%{ transform:translate(-48%,-50%) rotate(1deg); }
+  100%{ transform:translate(-50%,-50%); }
+}
+
+/* EL & YUMRUK */
+.efekt{ position:absolute; font-size:85px; z-index:3; opacity:0; }
+#elSag{ right:8%; top:50%; transform:translateY(-50%); }
+#elSol{ left:8%; top:50%; transform:translateY(-50%) scaleX(-1); }
+#yumruk{ left:50%; top:18%; transform:translateX(-50%); }
+
+input{ display:none; }
+</style>
+</head>
+
+<body>
+
+<h1>ABDÃœLKADÄ°Râ€™Ä° TOKATLAMA OYUNU</h1>
+
+<div id="canBar"><div id="can"></div></div>
+
+<div id="panel">
+  <div id="sayac">Tokat SayÄ±sÄ±: 0</div>
+  <button onclick="fotoSec()">FotoÄŸraf YÃ¼kle</button>
+  <button onclick="sifirla()">SÄ±fÄ±rla</button>
+</div>
+
+<div id="oyun">
+  <img id="oyuncuFoto">
+  <div id="elSag" class="efekt">ðŸ‘‹</div>
+  <div id="elSol" class="efekt">ðŸ‘‹</div>
+  <div id="yumruk" class="efekt">ðŸ‘Š</div>
+</div>
+
+<input type="file" id="fotoInput" accept="image/*">
+
+<script>
+let maxCan=1000, can=maxCan, sayac=0;
+
+const foto=document.getElementById("oyuncuFoto");
+const canBar=document.getElementById("can");
+const sayacYazi=document.getElementById("sayac");
+const input=document.getElementById("fotoInput");
+const elSag=document.getElementById("elSag");
+const elSol=document.getElementById("elSol");
+const yumruk=document.getElementById("yumruk");
+
+const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+
+/* TOKAT SAYISINA GÃ–RE DAHA SERT SES */
+function tokatSesi(guc){
+  const dur=0.05 + guc*0.02;          // sÃ¼re artar
+  const bufferSize=audioCtx.sampleRate*dur;
+  const buffer=audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data=buffer.getChannelData(0);
+
+  for(let i=0;i<bufferSize;i++){
+    data[i]=(Math.random()*2-1)*(1-i/bufferSize)*(0.8+guc);
+  }
+
+  const src=audioCtx.createBufferSource();
+  src.buffer=buffer;
+
+  const filter=audioCtx.createBiquadFilter();
+  filter.type="lowpass";
+  filter.frequency.value=900 + guc*600;
+
+  src.connect(filter);
+  filter.connect(audioCtx.destination);
+  src.start();
+}
+
+function yumrukSesi(){
+  const osc=audioCtx.createOscillator();
+  osc.frequency.value=120;
+  osc.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime+0.12);
+}
+
+function fotoSec(){ input.click(); }
+input.onchange=()=>{
+  if(input.files[0]){
+    foto.src=URL.createObjectURL(input.files[0]);
+    foto.style.display="block";
+  }
+};
+
+function efektGoster(el){
+  el.style.opacity=1;
+  setTimeout(()=>el.style.opacity=0,120);
+}
+
+function fotoSalla(){
+  foto.classList.add("foto-shake");
+  setTimeout(()=>foto.classList.remove("foto-shake"),180);
+}
+
+function vur(tip){
+  if(foto.style.display==="none") return;
+
+  sayac++; can-=10;
+  const guc=Math.min(sayac/30,1); // tokat arttÄ±kÃ§a gÃ¼Ã§lenir
+
+  fotoSalla();
+
+  if(tip==="sag"){ efektGoster(elSag); tokatSesi(guc); }
+  if(tip==="sol"){ efektGoster(elSol); tokatSesi(guc); }
+  if(tip==="yumruk"){ efektGoster(yumruk); yumrukSesi(); }
+
+  if(can<=0){
+    alert("CAN BÄ°TTÄ°! OYUN YENÄ°DEN BAÅžLADI");
+    sifirla();
+  }
+
+  canBar.style.width=(can/maxCan*100)+"%";
+  sayacYazi.innerText="Tokat SayÄ±sÄ±: "+sayac;
+}
+
+function sifirla(){
+  can=maxCan; sayac=0;
+  canBar.style.width="100%";
+  sayacYazi.innerText="Tokat SayÄ±sÄ±: 0";
+}
+
+document.addEventListener("click",e=>{
+  const w=innerWidth, h=innerHeight;
+  if(e.clientY<h*0.25||e.clientY>h*0.75) vur("yumruk");
+  else if(e.clientX<w/2) vur("sol");
+  else vur("sag");
+});
+</script>
+
+</body>
+                                       </html>
