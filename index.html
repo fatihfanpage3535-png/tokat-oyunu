@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ABDÃœLKADÄ°Râ€™Ä° TOKATLAMA OYUNU</title>
+<title>ABDÜLKADİR’İ TOKATLAMA OYUNU</title>
 
 <style>
 body{
@@ -13,167 +13,232 @@ body{
   font-family:Arial, sans-serif;
   overflow:hidden;
 }
-h1{ text-align:center; margin:10px 0; font-size:22px; }
+h1{text-align:center;margin:10px 0}
+
+#startScreen,#messageScreen{
+  position:fixed; inset:0;
+  background:#000c;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+
+input,button{
+  padding:10px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  margin:6px;
+}
 
 #canBar{
-  width:75%; height:16px; background:#444;
-  margin:auto; border-radius:10px; overflow:hidden;
+  width:75%;height:16px;background:#444;
+  margin:auto;border-radius:10px;overflow:hidden;
 }
-#can{ width:100%; height:100%; background:limegreen; }
+#can{height:100%;width:100%;background:limegreen}
 
-#panel{ text-align:center; margin-top:10px; }
-button{
-  padding:10px 16px; margin:5px; font-size:15px;
-  border-radius:8px; border:none;
-}
+#stats{text-align:center;margin-top:6px}
 
-#oyun{ position:relative; width:100%; height:70vh; }
+#oyun{position:relative;height:70vh}
 
-#oyuncuFoto{
-  position:absolute; top:50%; left:50%;
-  width:270px; transform:translate(-50%,-50%);
-  border-radius:15px; display:none; z-index:2;
+#foto{
+  position:absolute;
+  top:50%;left:50%;
+  width:300px;
+  transform:translate(-50%,-50%);
+  border-radius:15px;
 }
 
-/* FOTOÄžRAF SHAKE */
-.foto-shake{
-  animation: fotoShake 0.18s;
-}
-@keyframes fotoShake{
-  0%{ transform:translate(-50%,-50%); }
-  25%{ transform:translate(-48%,-50%) rotate(1deg); }
-  50%{ transform:translate(-52%,-50%) rotate(-1deg); }
-  75%{ transform:translate(-48%,-50%) rotate(1deg); }
-  100%{ transform:translate(-50%,-50%); }
+.shake{animation:shake .18s}
+@keyframes shake{
+  0%{transform:translate(-50%,-50%)}
+  25%{transform:translate(-48%,-50%) rotate(1deg)}
+  50%{transform:translate(-52%,-50%) rotate(-1deg)}
+  75%{transform:translate(-48%,-50%) rotate(1deg)}
 }
 
-/* EL & YUMRUK */
-.efekt{ position:absolute; font-size:85px; z-index:3; opacity:0; }
-#elSag{ right:8%; top:50%; transform:translateY(-50%); }
-#elSol{ left:8%; top:50%; transform:translateY(-50%) scaleX(-1); }
-#yumruk{ left:50%; top:18%; transform:translateX(-50%); }
+.emoji{
+  position:absolute;
+  font-size:110px;
+  opacity:0;
+  animation:pop .25s forwards;
+  z-index:5;
+}
+@keyframes pop{
+  0%{opacity:0;transform:scale(.5)}
+  100%{opacity:1;transform:scale(1)}
+}
 
-input{ display:none; }
+.firework{
+  position:absolute;
+  font-size:60px;
+  animation:fw 1s forwards;
+}
+@keyframes fw{
+  0%{opacity:1;transform:scale(.5)}
+  100%{opacity:0;transform:scale(2)}
+}
 </style>
 </head>
 
 <body>
 
-<h1>ABDÃœLKADÄ°Râ€™Ä° TOKATLAMA OYUNU</h1>
+<div id="startScreen">
+  <h2>İsmini Yaz</h2>
+  <input id="username" placeholder="İsim">
+  <button onclick="start()">Oyna</button>
+</div>
 
+<div id="messageScreen" style="display:none">
+  <h2>Abdulkadir'den mesaj var</h2>
+  <button onclick="showStory()">Oku</button>
+  <div id="story" style="display:none;max-width:90%;text-align:center">
+    <p>
+    bir gün 32 gelsin diye bekliyorum abdulkadir geldi emirhan abi bi kere
+    yalıyımmı seninkini dedi bende dedimki kardeşim yok ya şimdi olurmu insanlar var
+    dedim neyse ertisi gün oldu tuvaletin orda kulağıma fısıldadı abi dedi şu yalama
+    işini bi halletsek bende dedim kardeşim olur ama bi fiyat konuşmamız lazım
+    neyse geçtik tuvalette konuşuyoruz fiyatta anlaşamadık ben bunu dövdüm.
+    </p>
+    <button onclick="resetAll()">Eziyete tekrar başla</button>
+  </div>
+</div>
+
+<h1>ABDÜLKADİR’İ TOKATLAMA OYUNU</h1>
 <div id="canBar"><div id="can"></div></div>
 
-<div id="panel">
-  <div id="sayac">Tokat SayÄ±sÄ±: 0</div>
-  <button onclick="fotoSec()">FotoÄŸraf YÃ¼kle</button>
-  <button onclick="sifirla()">SÄ±fÄ±rla</button>
+<div id="stats">
+  Tokat: <span id="hit">0</span> |
+  Rekor: <span id="record">0</span> |
+  Kalan Ölüm: <span id="remain">100</span>
 </div>
 
 <div id="oyun">
-  <img id="oyuncuFoto">
-  <div id="elSag" class="efekt">ðŸ‘‹</div>
-  <div id="elSol" class="efekt">ðŸ‘‹</div>
-  <div id="yumruk" class="efekt">ðŸ‘Š</div>
+  <img id="foto" src="abdulkadir.png">
 </div>
 
-<input type="file" id="fotoInput" accept="image/*">
-
 <script>
-let maxCan=1000, can=maxCan, sayac=0;
+let can=10000, maxCan=10000;
+let hit=0;
+let record=localStorage.getItem("rekor") || 0;
+let death=parseInt(localStorage.getItem("death")) || 0;
+let maxDeath=100;
+let username="", damage=20;
+let fwOnce=false;
+let firstDeathShown=localStorage.getItem("firstDeathShown")==="1";
 
-const foto=document.getElementById("oyuncuFoto");
-const canBar=document.getElementById("can");
-const sayacYazi=document.getElementById("sayac");
-const input=document.getElementById("fotoInput");
-const elSag=document.getElementById("elSag");
-const elSol=document.getElementById("elSol");
-const yumruk=document.getElementById("yumruk");
+const audio=new (window.AudioContext||window.webkitAudioContext)();
 
-const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+function slapSound(){
+  let b=audio.createBuffer(1,audio.sampleRate*0.1,audio.sampleRate);
+  let d=b.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+  let s=audio.createBufferSource();
+  s.buffer=b; s.connect(audio.destination); s.start();
+}
+function punchSound(){
+  let o=audio.createOscillator();
+  o.frequency.value=90;
+  o.connect(audio.destination);
+  o.start(); o.stop(audio.currentTime+.12);
+}
+function fireworkSound(){
+  let o=audio.createOscillator();
+  o.frequency.value=600;
+  o.connect(audio.destination);
+  o.start(); o.stop(audio.currentTime+.3);
+}
 
-/* TOKAT SAYISINA GÃ–RE DAHA SERT SES */
-function tokatSesi(guc){
-  const dur=0.05 + guc*0.02;          // sÃ¼re artar
-  const bufferSize=audioCtx.sampleRate*dur;
-  const buffer=audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data=buffer.getChannelData(0);
+function emoji(e,x,y){
+  let m=document.createElement("div");
+  m.className="emoji";
+  m.innerText=e;
+  m.style.left=x+"px";
+  m.style.top=y+"px";
+  document.body.appendChild(m);
+  setTimeout(()=>m.remove(),250);
+}
 
-  for(let i=0;i<bufferSize;i++){
-    data[i]=(Math.random()*2-1)*(1-i/bufferSize)*(0.8+guc);
+function firework(){
+  fireworkSound();
+  for(let i=0;i<10;i++){
+    let f=document.createElement("div");
+    f.className="firework";
+    f.innerText="🎆";
+    f.style.left=Math.random()*innerWidth+"px";
+    f.style.top=Math.random()*innerHeight+"px";
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(),1000);
   }
-
-  const src=audioCtx.createBufferSource();
-  src.buffer=buffer;
-
-  const filter=audioCtx.createBiquadFilter();
-  filter.type="lowpass";
-  filter.frequency.value=900 + guc*600;
-
-  src.connect(filter);
-  filter.connect(audioCtx.destination);
-  src.start();
 }
 
-function yumrukSesi(){
-  const osc=audioCtx.createOscillator();
-  osc.frequency.value=120;
-  osc.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime+0.12);
-}
-
-function fotoSec(){ input.click(); }
-input.onchange=()=>{
-  if(input.files[0]){
-    foto.src=URL.createObjectURL(input.files[0]);
-    foto.style.display="block";
-  }
-};
-
-function efektGoster(el){
-  el.style.opacity=1;
-  setTimeout(()=>el.style.opacity=0,120);
-}
-
-function fotoSalla(){
-  foto.classList.add("foto-shake");
-  setTimeout(()=>foto.classList.remove("foto-shake"),180);
-}
-
-function vur(tip){
-  if(foto.style.display==="none") return;
-
-  sayac++; can-=10;
-  const guc=Math.min(sayac/30,1); // tokat arttÄ±kÃ§a gÃ¼Ã§lenir
-
-  fotoSalla();
-
-  if(tip==="sag"){ efektGoster(elSag); tokatSesi(guc); }
-  if(tip==="sol"){ efektGoster(elSol); tokatSesi(guc); }
-  if(tip==="yumruk"){ efektGoster(yumruk); yumrukSesi(); }
-
-  if(can<=0){
-    alert("CAN BÄ°TTÄ°! OYUN YENÄ°DEN BAÅžLADI");
-    sifirla();
-  }
-
-  canBar.style.width=(can/maxCan*100)+"%";
-  sayacYazi.innerText="Tokat SayÄ±sÄ±: "+sayac;
-}
-
-function sifirla(){
-  can=maxCan; sayac=0;
-  canBar.style.width="100%";
-  sayacYazi.innerText="Tokat SayÄ±sÄ±: 0";
+function start(){
+  username=document.getElementById("username").value||"oyuncu";
+  if(username==="admin") damage=2000;
+  document.getElementById("startScreen").style.display="none";
 }
 
 document.addEventListener("click",e=>{
-  const w=innerWidth, h=innerHeight;
-  if(e.clientY<h*0.25||e.clientY>h*0.75) vur("yumruk");
-  else if(e.clientX<w/2) vur("sol");
-  else vur("sag");
+  if(document.getElementById("startScreen").style.display!=="none") return;
+
+  hit++;
+  can-=damage;
+
+  foto.classList.add("shake");
+  setTimeout(()=>foto.classList.remove("shake"),180);
+  navigator.vibrate?.(50);
+
+  let h=innerHeight;
+  if(e.clientY<h*.25||e.clientY>h*.75){
+    punchSound(); emoji("👊",e.clientX,e.clientY);
+  }else{
+    slapSound(); emoji("👋",e.clientX,e.clientY);
+  }
+
+  if(hit>record){
+    record=hit;
+    localStorage.setItem("rekor",record);
+    if(!fwOnce){ firework(); fwOnce=true; }
+  }
+
+  if(can<=0){
+    death++;
+    localStorage.setItem("death",death);
+    can=maxCan;
+    fwOnce=false;
+
+    if(death===1 && !firstDeathShown){
+      alert("EVET ABDÜLKADİR’İ ÖLDÜRMEYİ BAŞARDIN\nAMA ŞUNU UNUTTUN\nABDÜLKADİR’İN 100 CANI VAR");
+      firstDeathShown=true;
+      localStorage.setItem("firstDeathShown","1");
+    }
+
+    if(death===100){
+      firework();
+      document.getElementById("messageScreen").style.display="flex";
+    }
+  }
+
+  document.getElementById("hit").innerText=hit;
+  document.getElementById("record").innerText=record;
+  document.getElementById("remain").innerText=maxDeath-death;
+  document.getElementById("can").style.width=(can/maxCan*100)+"%";
 });
+
+function showStory(){
+  document.getElementById("story").style.display="block";
+}
+
+function resetAll(){
+  localStorage.clear();
+  location.reload();
+}
+
+document.getElementById("record").innerText=record;
+document.getElementById("remain").innerText=maxDeath-death;
 </script>
 
 </body>
-                                       </html>
+</html>
